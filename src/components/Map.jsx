@@ -10,6 +10,7 @@ import legalPracticeCountil from "../icons/legal-practice-council.svg";
 import ngoLawClinics from "../icons/ngo-law-clinics.svg";
 import rentalHousingTribunal from "../icons/rental-housing-tribunal.svg";
 import universityLawClinics from "../icons/university-law-clinics.svg";
+import userIcon from "../icons/user-icon.png";
 
 
 
@@ -28,9 +29,12 @@ export class Map extends React.Component {
             center: [-30.559482, 22.937506],
             zoom: 6,
             options: [],
-            loading: false
+            loading: false,
+            userLocated: false
         }
         this.mapRef = React.createRef();
+        this.userRef = React.createRef();
+        this.searchRef = React.createRef();
         
     }
 
@@ -63,8 +67,10 @@ export class Map extends React.Component {
     useLocation = () => {
         if (window.navigator.geolocation) {
             window.navigator.geolocation.getCurrentPosition((position) => {
-                this.setState({center: [position.coords.latitude, position.coords.longitude], zoom: 13}, () => {
+                this.setState({center: [position.coords.latitude, position.coords.longitude], zoom: 13, userLocated: true}, () => {
                     this.mapRef.current.setView(this.state.center, this.state.zoom);
+                    this.userRef.current.position = this.state.center;
+                    this.searchRef.current.value = "";
                 })
             })
         }
@@ -102,7 +108,7 @@ export class Map extends React.Component {
             <div className="map-search-container-header" onClick={() => this.closeSearch()}>
                 <div className="map-search-container">
                     <div className="map-search-container-col search-box">
-                        <input type="text" placeholder="Search for your address to find assistance near you..." onChange={(e) => this.addressLookup(e.target.value)} className={this.state.loading ? 'loading' : ''}/>
+                        <input ref={this.searchRef} type="text" placeholder="Search for your address to find assistance near you..." onChange={(e) => this.addressLookup(e.target.value)} className={this.state.loading ? 'loading' : ''}/>
                     </div>
                     <div className="map-search-container-col my-location">
                         <button className="geolocation-btn" onClick={() => this.useLocation()}>Use my location</button>
@@ -113,7 +119,9 @@ export class Map extends React.Component {
                                 return <li as="li" action key={index} onClick={() => {
                                     this.setState({center: [item.value.lat, item.value.lon], zoom: 13}, () => {
                                         this.mapRef.current.setView(this.state.center, this.state.zoom);
-                                        this.setState({options: []});
+                                        this.setState({options: [], userLocated: true}, () => {
+                                            this.userRef.current.position = this.state.center;
+                                        });
                                     })
                                 }}>{item.label}</li>
                             })}
@@ -126,6 +134,14 @@ export class Map extends React.Component {
                 <MapContainer ref={this.mapRef} center={this.state.center} zoom={this.state.zoom} scrollWheelZoom={false} style={{height: '600px'}} zoomControl={false}>
                     <TileLayer url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" />
                     <ZoomControl position="bottomright"/>
+                    {this.state.userLocated &&
+                        <Marker
+                        ref={this.userRef}
+                        key="user"
+                        position={this.state.center}
+                        icon={new Icon({iconUrl: userIcon, iconSize: [25, 41], iconAnchor: [12, 20]})}>
+                        ></Marker>
+                    }
 
                     {offices.map((office, index) => {
                         return (
