@@ -17,7 +17,7 @@ import userIcon from "../icons/user-icon.png";
 import {Icon} from 'leaflet';
 
 
-import offices from '../offices.csv';
+import offices from '../offices-2.csv';
 
 
 export class Map extends React.Component {
@@ -140,7 +140,7 @@ export class Map extends React.Component {
                         key="user"
                         position={this.state.center}
                         icon={new Icon({iconUrl: userIcon, iconSize: [25, 41], iconAnchor: [12, 20]})}>
-                        ></Marker>
+                        </Marker>
                     }
 
                     {offices.map((office, index) => {
